@@ -31,13 +31,34 @@ def bfs(graph, start, end):
     queue.append([start])
     while queue:
         path = queue.pop(0)
+        #print(path)
         node = path[-1]
         if node == end:
             return path
         for adjacent in graph.get(node, []):
             new_path = list(path)
             new_path.append(adjacent)
-            queue.append(new_path)
+            if new_path not in queue:
+            	queue.append(new_path)
+
+            #print(queue)
+
+'''
+def dfs(d_nodes, start, end):
+	stack = [start]
+	seen = [start]
+	path = []
+	while len(stack) > 0:
+		v = stack.pop()
+		path.append(v)
+		if v == end:
+			return path
+		for u in d_nodes[v]:
+			if not u in seen:
+				seen.append(u)
+				stack.append(u)
+'''
+
 
 def pairs_in_list(l):
 	pairs = []
@@ -57,47 +78,127 @@ def adjacent_pairs(l):
 		pairs.append((l[i], l[i+1]))
 		i += 1
 	return pairs
+def dfs(graph, start, end):
+    stack, path = [start], []
 
-def distance(n, d_nodes, d_weights, paths):
-	#print(d_nodes)
-	#print(d_weights)
+    while stack:
+        vertex = stack.pop()
+        if vertex in path:
+            continue
+        path.append(vertex)
+        for neighbor in graph[vertex]:
+            stack.append(neighbor)
+            if neighbor == end:
+            	path.append(neighbor)
+            	return path
+
+            	
+
+def distance_between_leaves(n, d_nodes, d_weights):
+	#floyd warshal algorithm
+	m = 0
+	for node in d_nodes:
+		m+=1
+
 	mat = []
+	for i in range(m):
+		l = []
+		for j in range(m):
+			l.append(float('Inf'))
+		mat.append(l)
+
+	for node in d_nodes:
+		for edge in d_nodes[node]:
+			index = d_nodes[node].index(edge)
+			mat[node][edge] = d_weights[node][index]
+
+	for i in range(m):
+		mat[i][i] = 0
+
+	for k in range(m):
+		for i in range(m):
+			for j in range(m):
+				mat[i][j] = min(mat[i][j], mat[i][k] + mat[k][j])
+
+	new_mat = []
 	for i in range(n):
 		l = []
 		for j in range(n):
 			l.append(0)
-		mat.append(l)
+		new_mat.append(l)
 
-	for path in paths:
-		#print(path)
-		d = 0
-		pairs = adjacent_pairs(path)
-		for tup in pairs:
-			start = tup[0]
-			end = tup[1]
-			try:
-				index = d_nodes[start].index(end)
-				d += d_weights[start][index]
-			except:
-				index = d_nodes[end].index(start)
-				d += d_weights[end][index]
-		mat[path[0]][path[-1]] = mat[path[-1]][path[0]] = d
-	return mat
-
-def distance_between_leaves(n, d_nodes, d_weights):
-	l = []
 	for i in range(n):
-		l.append(i)
-	pairs = pairs_in_list(l)
-	paths = []
-	for tup in pairs:
-		paths.append(bfs(d_nodes, tup[0], tup[1]))
-	mat = distance(n, d_nodes, d_weights, paths)
+		for j in range(n):
+			new_mat[i][j] = mat[i][j]
+
+	return new_mat
+
+
+
+
+
+
+
+	'''
+	for path in paths:
+		start = path[0]
+		end = path[-1]
+		d = 0
+		for i in range(0, len(path) - 1):
+			try:
+				index = d_nodes[path[i]].index(path[i+1])
+				d += d_weights[path[i]][index]
+			except:
+				index = d_nodes[path[i+1]].index(path[i])
+				d += d_weights[path[i+1]][index]
+		mat[start][end] = d
+		mat[end][start] = d
 	return mat
 
-n = 4
-file = 'weights.txt'
+	
+
+	paths = []
+	for node in d_nodes:
+		paths.append(dfs(d_nodes, node))
+	m = len(paths[0])
+	mat = []
+	for i in range(m):
+		l = []
+		for j in range(m):
+			l.append(0)
+		mat.append(l)
+	distances = []
+	for path in paths:
+		dist = [0]
+		d = 0
+		for i in range(len(path) - 1):
+			try:
+				index = d_nodes[path[i]].index(path[i+1])
+				d += d_weights[path[i]][index]
+			except:
+				try:
+					index = d_nodes[path[i+1]].index(path[i])
+					d += d_weights[path[i+1]][index]
+				except:
+					d = 0
+			dist.append(d)
+		distances.append(dist)
+	
+	for i in range(m):
+		keys = paths[i]
+		values = distances[i]
+		for j in range(m):
+			mat[keys[0]][j] = values[j]
+	'''
+
+
+n = 32
+file = '../Downloads/dataset_10328_12.txt'
 d_nodes, d_weights = read_distance_between_leaves(file)
-mat = distance_between_leaves(n, d_nodes, d_weights)
-for l in mat:
-	print(*l)
+#mat = distance_between_leaves(n, d_nodes, d_weights)
+#for l in mat:
+#	print(*l)
+m = distance_between_leaves(n, d_nodes, d_weights)
+
+for line in m:
+	print(*line)
