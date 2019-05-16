@@ -136,7 +136,7 @@ def upgma(mat, n):
 		#print(clusters)
 		def find_closest_clusters():
 			min_element = np.min(new_distances[np.nonzero(new_distances)])
-			print(min_element)
+			#print(min_element)
 			index = np.where(new_distances == min_element)[0]
 			i = index[0]
 			j = index[1]
@@ -178,6 +178,14 @@ def upgma(mat, n):
 
 	return G.edges.data()
 
+def upgma_print(g_edges):
+	l = []
+	for u, v, a in g_edges:
+		string = str(u) + '->' +str(v) + ':' + str('{0:.3f}'.format(a['age']))
+		l.append(string)
+		string = str(v) + '->' +str(u) + ':' + str('{0:.3f}'.format(a['age']))
+		l.append(string)
+	return l
 
 	
 
@@ -205,6 +213,10 @@ G = additive_phylogeny(mat, counter)
 '''
 file = 'upgma.txt'
 mat = limb_length_input(file)
-n = 27
-print(upgma(mat, n))
+n = 22
+g_edges = upgma(mat, n)
+l = upgma_print(g_edges)
+l.sort()
+for i in l:
+	print(i)
 
