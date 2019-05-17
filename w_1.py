@@ -193,7 +193,7 @@ def neighbor_joining(D, n, nodes = None):
 
 	if n == 2:
 		G = nx.Graph()
-		G.add_edge(0, 1, length = D[0, 1])
+		G.add_edge(nodes[0], nodes[1], length = D[0, 1])
 		return G
 	total_distance = []
 	D_star = []
@@ -266,8 +266,14 @@ def neighbor_joining(D, n, nodes = None):
 	G.add_edge(node_j, new_node, length = limb_length_j)
 	return G
 
-
-	
+def neighbor_joining_print(G):
+	l = []
+	for u, v, a in G.edges.data():
+		string = str(u) + '->' +str(v) + ':' + str('{0:.3f}'.format(a['length']))
+		l.append(string)
+		string = str(v) + '->' +str(u) + ':' + str('{0:.3f}'.format(a['length']))
+		l.append(string)
+	return l
 	
 
 
@@ -311,4 +317,7 @@ mat = limb_length_input(file)
 D = np.array(mat)
 n = 32
 G = neighbor_joining(D, n)
-print(G.edges.data())
+l = neighbor_joining_print(G)
+for i in l:
+	print(i)
+
