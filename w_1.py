@@ -127,7 +127,7 @@ def upgma(mat, n):
 	G = nx.Graph()
 	G.add_nodes_from([i for i in range(0, n)], age = 0)
 	new_distances = copy.deepcopy(distances)
-	while len(clusters) > 1:
+	while len(clusters) > 2:
 		def distance_between_clusters(i, j):
 			if i in clusters and j in clusters:
 				d = sum([distances[x, y] for x in clusters[i] for y in clusters[j]])/(len(clusters[i])*len(clusters[j]))
@@ -187,7 +187,92 @@ def upgma_print(g_edges):
 		l.append(string)
 	return l
 
+def neighbor_joining(D, n, nodes = None):
+	if nodes == None:
+		nodes = [i for i in range(n)]
+
+	if n == 2:
+		G = nx.Graph()
+		G.add_edge(0, 1, length = D[0, 1])
+		return G
+	total_distance = []
+	D_star = []
+	for i in range(len(D)):
+		s = 0
+		l = []
+		for j in range(len(D[i])):
+			s += D[i, j]
+			l.append(0)
+		total_distance.append(s)
+		D_star.append(l)
+
+	for i in range(len(D)):
+		for j in range(len(D[i])):
+			D_star[i][j] = (n-2)*D[i, j] - total_distance[i] - total_distance[j]
+
+	D_star = np.array(D_star)
+	np.fill_diagonal(D_star, 0)
+	def find_closest_clusters():
+		min_element = float('Inf')
+		p, q = 0, 0
+		for i in range(len(D_star)):
+			for j in range(len(D_star[i])):
+				if i != j:
+					if D_star[i, j] < min_element:
+						min_element = D_star[i, j]
+						p = i
+						q = j
+		'''
+		min_element = np.min(D_star[np.nonzero(D_star)])
+		index = np.where(D_star == min_element)
+		print(index, 'index')
+		i = index[0]
+		j = index[1]
+		print(min_element, 'min')
+		'''
+		return (p, q)
+
+	i, j = find_closest_clusters()
+	#print(i, j)
+	delta = (total_distance[i] - total_distance[j])/(n-2)
+	limb_length_i = (D[i, j] + delta)/2
+	limb_length_j = (D[i, j] - delta)/2
+	new_row = [(D[k, i] + D[k, j] - D[i, j])/2 for k in range(n)]
+	D = np.concatenate((D, [new_row]))
+	m = []
+	for dist in new_row:
+		m.append([dist])
+	m.append([float(0)])
+	D = np.append(D, m, axis = 1)
+
+	new_node = nodes[len(nodes) - 1] + 1
+	nodes.append(new_node)
+
+	D = np.delete(D, (i, j), axis = 0)
+	D = np.delete(D, (i, j), axis = 1)
+
+	node_i = nodes[i]
+	node_j = nodes[j]
 	
+
+	#print(nodes)
+	#print(D)
+	#print(D_star)
+	nodes.remove(node_i)
+	nodes.remove(node_j)
+	G = neighbor_joining(D, n-1, nodes)
+
+	G.add_edge(node_i, new_node, length = limb_length_i)
+	G.add_edge(node_j, new_node, length = limb_length_j)
+	return G
+
+
+	
+	
+
+
+
+
 
 '''
 n = 32
@@ -211,6 +296,7 @@ mat = limb_length_input(file)
 counter = len(mat)
 G = additive_phylogeny(mat, counter)
 '''
+'''
 file = 'upgma.txt'
 mat = limb_length_input(file)
 n = 22
@@ -219,4 +305,10 @@ l = upgma_print(g_edges)
 l.sort()
 for i in l:
 	print(i)
-
+'''
+file = 'nj.txt'
+mat = limb_length_input(file)
+D = np.array(mat)
+n = 32
+G = neighbor_joining(D, n)
+print(G.edges.data())
