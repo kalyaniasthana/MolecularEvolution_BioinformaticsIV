@@ -279,6 +279,94 @@ def small_parsimony_unrooted(descendant, successor, dna, n):
 	return p, score
 
 
+def nearest_neighbors_input(file):
+	read = open(file)
+	d = {}
+	for line in read:
+		l = line.strip()
+		l = l.split('->')
+		if int(l[0]) not in d:
+			d[int(l[0])] = []
+		d[int(l[0])].append(int(l[1]))
+	return d
+
+def nearest_neighbors_interchange(d, a, b):
+
+	d_1 = copy.deepcopy(d)
+	d_2 = copy.deepcopy(d)
+
+	#interchange x and y
+	d_1[a].remove(b)
+	d_1[b].remove(a)
+
+	#w = d_1[a][0]
+	x = d_1[a][1]
+
+	y = d_1[b][0]
+	#z = d_1[b][1]
+	d_1[a].remove(x)
+	d_1[x].remove(a)
+	d_1[x].append(b)
+	d_1[a].append(y)
+	d_1[b].remove(y)
+	d_1[y].remove(b)
+	d_1[y].append(a)
+	d_1[b].append(x)
+
+
+
+	d_1[a].append(b)
+	d_1[b].append(a)
+
+	#interchange x and z
+
+	d_2[a].remove(b)
+	d_2[b].remove(a)
+
+	#w = d_1[a][0]
+	x = d_2[a][1]
+
+	#y = d_1[b][0]
+	z = d_2[b][1]
+
+	d_2[a].remove(x)
+	d_2[x].remove(a)
+	d_2[x].append(b)
+	d_2[a].append(z)
+	d_2[b].remove(z)
+	d_2[z].remove(b)
+	d_2[z].append(a)
+	d_2[b].append(x)
+
+	d_2[a].append(b)
+	d_2[b].append(a)
+
+	tuples_1 = []
+	tuples_2 = []
+	for node in d_1:
+		for item in d_1[node]:
+			tuples_1.append((node, item))
+	for node in d_2:
+		for item in d_2[node]:
+			tuples_2.append((node, item))
+
+	l_1, l_2 = [], []
+	for tup in tuples_1:
+		l_1.append(str(tup[0]) + '->' + str(tup[1]))
+	for tup in tuples_2:
+		l_2.append(str(tup[0]) + '->' + str(tup[1]))
+
+	return l_1, l_2
+
+
+
+
+
+
+
+
+
+
 	
 '''
 n = 128
@@ -289,6 +377,7 @@ print(score)
 for i in p:
 	print(i)
 '''
+'''
 n = 32
 file = 'parsimony.txt'
 descendant, successor, dna = small_parsimony_unrooted_input(file, n)
@@ -296,5 +385,18 @@ p, score = small_parsimony_unrooted(descendant, successor, dna, n)
 print(score)
 for i in p:
 	print(i)
+'''
+'''
+a = 34
+b = 60
+file = 'nearest_neighbors.txt'
+d = nearest_neighbors_input(file)
+l_1, l_2 = nearest_neighbors_interchange(d, a, b)
+for edge in l_1:
+	print(edge)
+print('\n')
+for edge in l_2:
+	print(edge)
+'''
 
 
