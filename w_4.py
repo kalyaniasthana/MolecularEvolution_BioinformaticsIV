@@ -4,8 +4,8 @@ import copy
 import numpy as np
 from collections import Counter
 
-AA = np.array(['G','A','S','P','V','T','C','I','L','N','D','Q','K','E','M','H','F','R','Y','W'])
-AW = np.array([ 57,71,87,97,99,101,103,113,113,114,115,128,128,129,131,137,147,156,163,186])
+AA = np.array(['G','A','S','P','V','T','C','I','L','N','D','Q','K','E','M','H','F','R','Y','W','X','Z'])
+AW = np.array([ 57,71,87,97,99,101,103,113,113,114,115,128,128,129,131,137,147,156,163,186,4,5])
 
 
 def graph_spectrum_input(file):
@@ -99,7 +99,33 @@ def decoding_ideal_spectrum(spectrum):
 		if Counter(ideal_spectrum(peptide)) == Counter(spectrum):
 			return peptide
 
+def peptide_vector(peptide):
+	peptide = list(peptide)
+	prefix_mass = 0
 
+	spectrum = []
+	for i in range(len(peptide)):
+		prefix = peptide[i]
+		prefix_mass += AW[np.where(AA == prefix)][0]
+		spectrum.append(prefix_mass)
+
+	spectrum = list(set(spectrum))
+	spectrum.sort()
+	last = spectrum[len(spectrum) - 1]
+	
+	vector = [0 for i in range(last)]
+	for i in spectrum:
+		vector[i-1] = 1
+	return vector
+
+peptide = 'EQAVMRFWGGLQSFPTTADHA'
+v = peptide_vector(peptide)
+for i in v:
+	print(i, end = ' ')
+print('\n')
+
+'''
 file = 'decoding.txt'
 spectrum = graph_spectrum_input(file)
 print(decoding_ideal_spectrum(spectrum))
+'''
