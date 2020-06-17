@@ -276,7 +276,7 @@ def small_parsimony_unrooted(descendant, successor, dna, n):
 
 		score += dist
 
-	return p, score
+	return p, score, dna
 
 
 def nearest_neighbors_input(file):
@@ -290,7 +290,7 @@ def nearest_neighbors_input(file):
 		d[int(l[0])].append(int(l[1]))
 	return d
 
-def nearest_neighbors_interchange(d, a, b):
+def nearest_neighbors(d, a, b):
 
 	d_1 = copy.deepcopy(d)
 	d_2 = copy.deepcopy(d)
@@ -358,15 +358,115 @@ def nearest_neighbors_interchange(d, a, b):
 
 	return l_1, l_2
 
+def nearest_neighbors_interchange_input(file, n):
+	#descendant, successsor, d, dna
+	read = open(file)
+	descendant = {}
+	successor = {}
+	d ={}
+	x = 0
+	m = 2*n - 1
+	dna = ['' for i in range(n)]
+	for i in range(n, m):
+		descendant[i] = []
+	for i in range(0, m):
+		d[i] = []
+
+	for line in read:
+		l = line.strip()
+		l = l.split('->')
+
+		try:
+			int(l[0])
+			try:
+				int(l[1])
+				if (int(l[0]) == m - 3 and int(l[1]) == m - 2) or (int(l[1]) == m - 3 and int(l[0]) == m-2):
+					if int(l[0]) < m-1:
+						descendant[m-1].append(int(l[0]))
+					successor[int(l[0])] = m-1
+					d[m-1].append(int(l[0]))
+					d[int(l[0])].append(m-1)
+
+					descendant[m-1] = list(set(descendant[m-1]))
+					d[m-1] = list(set(d[m-1]))
+					d[int(l[0])] = list(set(d[int(l[0])]))
+
+				else:
+					if int(l[1]) < int(l[0]):
+						descendant[int(l[0])].append(int(l[1]))
+					successor[int(l[1])] = int(l[0])
+					d[int(l[0])].append(int(l[1]))
+					d[int(l[1])].append(int(l[0]))
+
+					descendant[int(l[0])] = list(set(descendant[int(l[0])]))
+					d[int(l[0])] = list(set(d[int(l[0])]))
+					d[int(l[1])] = list(set(d[int(l[1])]))
+			except:
+				if x < n:
+					if x < int(l[0]):
+						descendant[int(l[0])].append(x)
+					successor[x] = int(l[0])
+					d[int(l[0])].append(x)
+					d[x].append(int(l[0]))
+					dna[x] = l[1]
+
+					descendant[int(l[0])] = list(set(descendant[int(l[0])]))
+					d[int(l[0])] = list(set(d[int(l[0])]))
+					d[x] = list(set(d[x]))
+					x += 1
+
+		except:
+			pass
+
+	return d, descendant, successor, dna
+
+def edges(d):
+	e = []
+	internal_edges = []
+	for key in d:
+		for item in d[key]:
+			e.append((key, item))
+			if len(d[key]) > 1 and len(d[item]) != 1:
+				internal_edges.append((key, item))
+	return e, internal_edges
+
+'''
+
+def nearest_neighbors_interchange(d, descendant, successor, dna, n):
+	score = float('Inf')
+	p, new_score, new_labels = small_parsimony_unrooted(descendant, successor, dna, n)
+	#print(p, score, dna)
+	new_tree, internal_edges = edges(d)
+	while new_score < score:
+		score = new_score
+		tree = new_tree
+		for edge in internal_edges:
+			print(edge)
+			a = edge[0]
+			b = edge[1]
 
 
 
+			#for nearest neighbor_tree to tree wrt the above edge
+			     #solve small parsimony for this tree
+			     #neighbor_score--score of the above tree
+			     #if neighbor_score < score
+			         #new_score = neighbor_score
+			         #new_tree = neighbor_tree
+			         #new_labels = neighbor_labels
+
+			#if new_score < score
+			    #print new tree with labels
 
 
 
+	return  
+	
+'''
 
 
 
+	
 	
 '''
 n = 128
@@ -391,12 +491,17 @@ a = 34
 b = 60
 file = 'nearest_neighbors.txt'
 d = nearest_neighbors_input(file)
-l_1, l_2 = nearest_neighbors_interchange(d, a, b)
+l_1, l_2 = nearest_neighbors(d, a, b)
 for edge in l_1:
 	print(edge)
 print('\n')
 for edge in l_2:
 	print(edge)
 '''
+
+n = 5
+file = 'nearest_interchange.txt'
+d , descendant, successor, dna = nearest_neighbors_interchange_input(file, n)
+print(nearest_neighbors_interchange(d, descendant, successor, dna, n))
 
 

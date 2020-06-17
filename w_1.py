@@ -73,47 +73,17 @@ def limb_length_input(file):
 	return mat
 
 def limb_length(n, j, mat):
-	#start = time()
 	val = float('Inf')
 	for i in range(n):
 		if i != j:
 			for k in range(n):
 				if k != j:
-					dist = (mat[i][j] + mat[j][k] - mat[i][k])/2
+					dist = (mat[i, j] + mat[j, k] - mat[i, k])/2
 					if dist < val:
 						val = dist
-	#end = time()
-	#print(end - start)
+	
 	return int(val)
-
-def additive_phylogeny(mat, counter):
-	n = len(mat)
-	if counter == 2:
-		G = nx.Graph()
-		G.add_weighted_edges_from([(0, 1, mat[0][1])])
-		return G
-	ll = limb_length(n, counter - 1, mat)
-	for j in range(0, counter - 1):
-		mat[j][counter - 1] -= ll
-		mat[counter - 1][j] = mat[j][counter - 1]
-	i, k = 0, 0
-	for p in range(0, n):
-		for q in range(0, n):
-			if mat[p][q] == mat[p][counter - 1] + mat[counter - 1][q]:
-				i = p
-				k = q
-				break
-	counter -= 1
-	x = mat[i][counter]
-	G = additive_phylogeny(mat, counter)
-	#v ← the (potentially new) node in T at distance x from i on the path between i and k
-	#add leaf n back to T by creating a limb (v, n) of length limbLength
-	'''
-	 the attachment point for leaf j must be located at distance 𝐷𝑏𝑎𝑙𝑑𝑖,𝑗 from leaf i on the path
-	 connecting i and k in the trimmed tree. This attachment point may occur at an existing node,
-	 in which case we connect j to this node. On the other hand, the attachment point for j may occur
-	 along an edge, in which case we place a new node at the attachment point and connect j to it.
-	 '''
+#def additive_phylogeny(m at, n): - I don't feel like implementing this one right now
 	
 def upgma(mat, n):
 	global distances
@@ -212,6 +182,7 @@ def neighbor_joining(D, n, nodes = None):
 
 	D_star = np.array(D_star)
 	np.fill_diagonal(D_star, 0)
+	print(D_star)
 	def find_closest_clusters():
 		min_element = float('Inf')
 		p, q = 0, 0
@@ -222,14 +193,6 @@ def neighbor_joining(D, n, nodes = None):
 						min_element = D_star[i, j]
 						p = i
 						q = j
-		'''
-		min_element = np.min(D_star[np.nonzero(D_star)])
-		index = np.where(D_star == min_element)
-		print(index, 'index')
-		i = index[0]
-		j = index[1]
-		print(min_element, 'min')
-		'''
 		return (p, q)
 
 	i, j = find_closest_clusters()
@@ -250,6 +213,7 @@ def neighbor_joining(D, n, nodes = None):
 
 	D = np.delete(D, (i, j), axis = 0)
 	D = np.delete(D, (i, j), axis = 1)
+	print(D)
 
 	node_i = nodes[i]
 	node_j = nodes[j]
@@ -299,9 +263,12 @@ print(limb_length(n, j, mat))
 '''
 file = 'additive.txt'
 mat = limb_length_input(file)
-counter = len(mat)
-G = additive_phylogeny(mat, counter)
+D = np.array(mat)
+n = 4
+G = additive_phylogeny(D, n)
+print(G)
 '''
+
 '''
 file = 'upgma.txt'
 mat = limb_length_input(file)
@@ -312,12 +279,14 @@ l.sort()
 for i in l:
 	print(i)
 '''
+
 file = 'nj.txt'
 mat = limb_length_input(file)
 D = np.array(mat)
-n = 32
+n = 4
 G = neighbor_joining(D, n)
 l = neighbor_joining_print(G)
 for i in l:
 	print(i)
+
 
